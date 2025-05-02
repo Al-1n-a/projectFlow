@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${board?.title} + ' | ProjectFlow'">Board</title>
+  <!-- Подключение CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/diagramStyles.css}">
+  <link rel="icon" href="data:,">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <meta name="boardId" th:content="${board.id}">
+</head>
+<body>
+
+<div id="loadingOverlay">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<div class="board-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/boards">My Boards</a></li>
+        <li class="breadcrumb-item active" aria-current="page" th:text="${board.title}"></li>
+      </ol>
+    </nav>
+    <h1 class="board-title" th:text="${board.title}"></h1>
+    <p class="board-description" th:text="${board.description} ?: 'No description'"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <select class="diagram-type-select" id="diagramTypeSelect">
+      <option th:each="type : ${diagramTypes}"
+              th:value="${type.type}"
+              th:text="${type.displayName}">
+      </option>
+    </select>
+    <button class="add-diagram-btn" id="addDiagramBtn">
+      <i class="fas fa-plus-circle"></i> Add Diagram
+    </button>
+  </div>
+
+  <div class="board-container" id="boardCanvas">
+    <div th:each="diagram : ${board.diagrams}"
+         class="diagram"
+         th:attr="data-id=${diagram.id}"
+         th:style="'left:' + ${diagram.positionX} + 'px; top:' + ${diagram.positionY} + 'px; width:' + ${diagram.width} + 'px; height:' + ${diagram.height} + 'px;'">
+      <div class="diagram-header">
+        <span>
+          <i class="fas" th:classappend="${diagram.type == 'GANTT'} ? 'fa-tasks' :
+                                        ${diagram.type == 'DFD'} ? 'fa-project-diagram' :
+                                        'fa-diagram-nested'"></i>
+          <span th:text="${diagram?.title ?: 'Unnamed Diagram'}"></span>
+        </span>
+        <div class="diagram-actions">
+          <button class="diagram-action-btn" th:attr="onclick='showEditModal(' + ${diagram.id} + ')'">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button class="diagram-action-btn" th:attr="onclick='deleteDiagram(' + ${diagram.id} + ')'">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="diagram-content">
+        <div th:if="${diagram?.type == 'GANTT'}" class="text-muted">
+          <i class="fas fa-tasks"></i> Gantt Chart
+        </div>
+        <div th:if="${diagram?.type == 'DFD'}" class="text-muted">
+          <i class="fas fa-project-diagram"></i> Data Flow Diagram
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{boards/includes/diagramModals :: loadingOverlay}"></div>
+<div th:replace="~{boards/includes/diagramModals :: editDiagramModal}"></div>
+
+<div th:insert="~{fragments/backToMenu :: back-to-menu-footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script th:src="@{/js/diagramScripts.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+/* ========== Глобальные переменные ========== */
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3a0ca3;
+    --accent-color: #4895ef;
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+}
+
+/* ========== Основные стили ========== */
+body {
+    background-color: var(--light-bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ========== Шапка доски ========== */
+.board-header {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.board-title {
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+.board-description {
+    color: #6c757d;
+}
+
+/* ========== Контейнер доски ========== */
+.board-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    min-height: 70vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========== Стили диаграмм ========== */
+.diagram {
+    position: absolute;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+    cursor: move;
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 150px;
+}
+
+.diagram:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+
+.diagram-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.diagram-content {
+    padding: 1rem;
+    height: calc(100% - 45px);
+    overflow: auto;
+}
+
+/* ========== Элементы управления диаграммами ========== */
+.diagram-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.diagram-action-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.diagram-action-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ========== Панель инструментов ========== */
+.toolbar {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.add-diagram-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.add-diagram-btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.diagram-type-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem;
+    margin-right: 1rem;
+}
+
+/* ========== Лоадер ========== */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.7);
+    display: none;
+    z-index: 1000;
+}
+
+/* ========== Модальные окна ========== */
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+}
+
+/* ========== Адаптивность ========== */
+@media (max-width: 768px) {
+    .board-container {
+        padding: 1rem;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .diagram {
+        min-width: 150px;
+        min-height: 120px;
+    }
+}

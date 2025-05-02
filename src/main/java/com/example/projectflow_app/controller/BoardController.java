@@ -3,17 +3,13 @@ package com.example.projectflow_app.controller;
 import com.example.projectflow_app.domain.Board;
 import com.example.projectflow_app.domain.Type;
 import com.example.projectflow_app.domain.User;
-import com.example.projectflow_app.dto.DiagramDTO;
-import com.example.projectflow_app.dto.DiagramDataDTO;
 import com.example.projectflow_app.dto.DiagramTypeDTO;
-import com.example.projectflow_app.dto.PositionDTO;
 import com.example.projectflow_app.service.BoardService;
 import com.example.projectflow_app.service.DiagramService;
 import com.example.projectflow_app.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -53,7 +48,7 @@ public class BoardController {
         CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
         model.addAttribute("_csrf", csrfToken);
 
-        return "boardsList";
+        return "boards/boardsList";
     }
 
     @GetMapping("/") //для отображения списка досок пользователя в главном меню
@@ -70,7 +65,7 @@ public class BoardController {
     @GetMapping("/create")
     public String showCreateBoardForm(Model model) {
         model.addAttribute("board", new Board());
-        return "createBoard";
+        return "boards/createBoard";
     }
 
     @PostMapping("/create")
@@ -103,7 +98,7 @@ public class BoardController {
                 .collect(Collectors.toList()));
 
 
-        return "boardView1";
+        return "boards/boardView1";
     }
 
     @DeleteMapping("/{boardId}")

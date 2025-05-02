@@ -1,10 +1,10 @@
-package com.example.artempolozov_app;
+package com.example.projectflow_app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ArtemPolozovAppApplicationTests {
+class ProjectFlowAppApplicationTests {
 
     @Test
     void contextLoads() {

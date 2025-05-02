@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Фрагмент лоадера -->
+<div th:fragment="loadingOverlay">
+    <div id="loadingOverlay">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фрагмент модального окна редактирования -->
+<div th:fragment="editDiagramModal" class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Diagram</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editDiagramId">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" id="editTitle">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Position X</label>
+                        <input type="number" class="form-control" id="editPosX">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Position Y</label>
+                        <input type="number" class="form-control" id="editPosY">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Width</label>
+                        <input type="number" class="form-control" id="editWidth">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Height</label>
+                        <input type="number" class="form-control" id="editHeight">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveDiagramBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
