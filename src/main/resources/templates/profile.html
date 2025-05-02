@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile | ProjectFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Основные стили */
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex: 1;
+    }
+
+    /* Стили для заголовка */
+    .profile-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #4361ee;
+      font-weight: 600;
+    }
+
+    /* Стили для формы */
+    .profile-form {
+      background-color: white;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .form-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-table tr:not(:last-child) {
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .form-table td {
+      padding: 1rem 0;
+      vertical-align: middle;
+    }
+
+    .form-table td:first-child {
+      width: 30%;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .form-control {
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #4361ee;
+      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+
+    /* Стили для кнопки */
+    .btn-submit {
+      background-color: #4361ee;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-submit:hover {
+      background-color: #3a56d4;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn-submit i {
+      margin-right: 8px;
+    }
+
+    /* Подсказки для полей */
+    .form-hint {
+      font-size: 0.875rem;
+      color: #6c757d;
+      margin-top: 0.25rem;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<!-- <div th:insert="~{fragments/menu :: #nav-menu}"></div> -->
+
+<div class="container">
+  <h1 class="profile-header">
+    <i class="fas fa-user-circle me-2"></i>User Profile
+  </h1>
+
+  <form th:action="@{/users/profile}" th:object="${user}" method="post" class="profile-form">
+    <table class="form-table">
+      <tr>
+        <td><label for="username">Имя</label></td>
+        <td>
+          <input type="text" id="username" th:field="*{username}" class="form-control"/>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="email">Email</label></td>
+        <td>
+          <input type="email" id="email" th:field="*{email}" class="form-control"/>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="password">Пароль</label></td>
+        <td>
+          <input type="password" id="password" th:field="*{password}" class="form-control"/>
+          <span class="form-hint">Оставьте поле пустым, чтобы сохранить текущий пароль</span>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="matchingPassword">Подтверждение пароля</label></td>
+        <td>
+          <input type="password" id="matchingPassword" th:field="*{matchingPassword}" class="form-control"/>
+        </td>
+      </tr>
+    </table>
+
+    <div class="text-center">
+      <button type="submit" class="btn-submit">
+        <i class="fas fa-save"></i> Сохранить изменения
+      </button>
+    </div>
+  </form>
+</div>
+
+<div th:insert="~{fragments/backToMenu :: back-to-menu-footer}"></div>
+
+<!-- Подключение скриптов -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

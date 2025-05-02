@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${board?.title} + ' | ProjectFlow'">Board</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="data:,">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4895ef;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .board-header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .board-title {
+      color: var(--secondary-color);
+      font-weight: 700;
+    }
+
+    .board-description {
+      color: #6c757d;
+    }
+
+    .board-container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      min-height: 70vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diagram {
+      position: absolute;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      transition: all 0.2s ease;
+      cursor: move;
+      overflow: hidden;
+      min-width: 200px;
+      min-height: 150px;
+    }
+
+    .diagram:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
+    }
+
+    .diagram-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+
+    .diagram-content {
+      padding: 1rem;
+      height: calc(100% - 45px);
+      overflow: auto;
+    }
+
+    .diagram-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .diagram-action-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 25px;
+      height: 25px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .diagram-action-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .add-diagram-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .add-diagram-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .diagram-type-select {
+      border-radius: 6px;
+      border: 1px solid #ced4da;
+      padding: 0.5rem;
+      margin-right: 1rem;
+    }
+
+    .toolbar {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.7);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+<div id="loadingOverlay">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Diagram</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editDiagramId">
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-control" id="editTitle">
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Position X</label>
+            <input type="number" class="form-control" id="editPosX">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Position Y</label>
+            <input type="number" class="form-control" id="editPosY">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Width</label>
+            <input type="number" class="form-control" id="editWidth">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Height</label>
+            <input type="number" class="form-control" id="editHeight">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveDiagramBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="board-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/boards">My Boards</a></li>
+        <li class="breadcrumb-item active" aria-current="page" th:text="${board.title}"></li>
+      </ol>
+    </nav>
+    <h1 class="board-title" th:text="${board.title}"></h1>
+    <p class="board-description" th:text="${board.description} ?: 'No description'"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="toolbar">
+    <select class="diagram-type-select" id="diagramTypeSelect">
+      <option th:each="type : ${diagramTypes}"
+              th:value="${type.type}"
+              th:text="${type.displayName}">
+      </option>
+    </select>
+    <button class="add-diagram-btn" id="addDiagramBtn">
+      <i class="fas fa-plus-circle"></i> Add Diagram
+    </button>
+  </div>
+
+  <div class="board-container" id="boardCanvas">
+    <div th:each="diagram : ${board.diagrams}"
+         class="diagram"
+         th:attr="data-id=${diagram.id}"
+         th:style="'left:' + ${diagram.positionX} + 'px; top:' + ${diagram.positionY} + 'px; width:' + ${diagram.width} + 'px; height:' + ${diagram.height} + 'px;'">
+      <div class="diagram-header">
+        <span>
+          <i class="fas" th:classappend="${diagram.type == 'GANTT'} ? 'fa-tasks' :
+                                        ${diagram.type == 'DFD'} ? 'fa-project-diagram' :
+                                        'fa-diagram-nested'"></i>
+          <span th:text="${diagram?.title ?: 'Unnamed Diagram'}"></span>
+        </span>
+        <div class="diagram-actions">
+          <button class="diagram-action-btn" th:attr="onclick='showEditModal(' + ${diagram.id} + ')'">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button class="diagram-action-btn" th:attr="onclick='deleteDiagram(' + ${diagram.id} + ')'">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="diagram-content">
+        <div th:if="${diagram?.type == 'GANTT'}" class="text-muted">
+          <i class="fas fa-tasks"></i> Gantt Chart
+        </div>
+        <div th:if="${diagram?.type == 'DFD'}" class="text-muted">
+          <i class="fas fa-project-diagram"></i> Data Flow Diagram
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script>
+  // Глобальные переменные
+  const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+  let currentDiagramId = null;
+
+  const boardId = [[${board.id}]];
+  // Проверка boardId
+  if (!boardId) {
+      console.error("Board ID is missing!");
+      showError("Board ID is missing! Some features may not work.");
+  }
+
+  // Показать ошибку
+  function showError(message) {
+    const errorElement = document.createElement('div');
+    errorElement.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+    errorElement.style.zIndex = '1100';
+    errorElement.textContent = message;
+    document.body.prepend(errorElement);
+    setTimeout(() => errorElement.remove(), 5000);
+  }
+
+  // Показать загрузку
+  function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'block';
+  }
+
+  // Скрыть загрузку
+  function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+
+  // Инициализация при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    initAddDiagramButton();
+    initSaveDiagramButton();
+    initDiagramsDragAndDrop();
+  });
+
+  // Инициализация кнопки добавления диаграммы
+  function initAddDiagramButton() {
+    document.getElementById('addDiagramBtn').addEventListener('click', async function() {
+      const diagramType = document.getElementById('diagramTypeSelect').value;
+      try {
+        showLoading();
+        const diagram = await addDiagram(diagramType);
+        createDiagramElement(diagram);
+      } catch (error) {
+        showError("Failed to add diagram: " + error.message);
+        console.error("Error adding diagram:", error);
+      } finally {
+        hideLoading();
+      }
+    });
+  }
+
+  // Инициализация кнопки сохранения диаграммы
+  function initSaveDiagramButton() {
+    document.getElementById('saveDiagramBtn').addEventListener('click', async function() {
+      try {
+        showLoading();
+        const diagramId = document.getElementById('editDiagramId').value;
+        const updateData = getDiagramUpdateData();
+        const updatedDiagram = await updateDiagram(diagramId, updateData);
+        updateDiagramElement(updatedDiagram);
+        bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+      } catch (error) {
+        showError("Failed to update diagram: " + error.message);
+        console.error("Error updating diagram:", error);
+      } finally {
+        hideLoading();
+      }
+    });
+  }
+
+  // Инициализация перетаскивания диаграмм
+  function initDiagramsDragAndDrop() {
+    document.querySelectorAll('.diagram').forEach(diagramEl => {
+      makeDraggable(diagramEl);
+    });
+  }
+
+  // Добавление новой диаграммы
+  async function addDiagram(diagramType) {
+    if (!boardId) {
+      showError("Cannot add diagram: board not loaded");
+      return;
+    }
+
+    try {
+      showLoading();
+      const url = `/boards/${boardId}/diagrams`;
+      console.log("Request URL:", url);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          [csrfHeader]: csrfToken,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          type: diagramType
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || `HTTP ${response.status}`);
+      }
+
+      const diagram = await response.json();
+      console.log("Created diagram:", diagram);
+      createDiagramElement(diagram);
+      return diagram;
+    } catch (error) {
+      console.error("Full error details:", error);
+      showError(`Diagram creation failed: ${error.message}`);
+      throw error;
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Обновление диаграммы
+  async function updateDiagram(diagramId, updateData) {
+    const response = await fetch(`/boards/${boardId}/diagrams/${diagramId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        [csrfHeader]: csrfToken
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  // Удаление диаграммы
+  async function deleteDiagram(diagramId) {
+    if (!confirm('Are you sure you want to delete this diagram?')) return;
+
+    try {
+      showLoading();
+      const response = await fetch(`/boards/${boardId}/diagrams/${diagramId}`, {
+        method: 'DELETE',
+        headers: {
+          [csrfHeader]: csrfToken
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      document.querySelector(`.diagram[data-id="${diagramId}"]`).remove();
+    } catch (error) {
+      showError("Failed to delete diagram: " + error.message);
+      console.error("Error deleting diagram:", error);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Создание элемента диаграммы
+  function createDiagramElement(diagram) {
+    const boardCanvas = document.getElementById('boardCanvas');
+    const diagramEl = document.createElement('div');
+    diagramEl.className = 'diagram';
+    diagramEl.dataset.id = diagram.id;
+    diagramEl.style.left = `${diagram.positionX}px`;
+    diagramEl.style.top = `${diagram.positionY}px`;
+    diagramEl.style.width = `${diagram.width}px`;
+    diagramEl.style.height = `${diagram.height}px`;
+
+    diagramEl.innerHTML = `
+      <div class="diagram-header">
+        <span>
+          <i class="fas ${getDiagramIconClass(diagram.type)}"></i>
+          <span>${diagram.title || 'Unnamed Diagram'}</span>
+        </span>
+        <div class="diagram-actions">
+          <button class="diagram-action-btn" onclick="showEditModal(${diagram.id})">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button class="diagram-action-btn" onclick="deleteDiagram(${diagram.id})">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="diagram-content">
+        <div class="text-muted">
+          <i class="fas ${getDiagramIconClass(diagram.type)}"></i>
+          ${getDiagramTypeName(diagram.type)}
+        </div>
+      </div>
+    `;
+
+    boardCanvas.appendChild(diagramEl);
+    makeDraggable(diagramEl);
+  }
+
+  // Обновление элемента диаграммы
+  function updateDiagramElement(diagram) {
+    const diagramEl = document.querySelector(`.diagram[data-id="${diagram.id}"]`);
+    if (!diagramEl) return;
+
+    diagramEl.style.left = `${diagram.positionX}px`;
+    diagramEl.style.top = `${diagram.positionY}px`;
+    diagramEl.style.width = `${diagram.width}px`;
+    diagramEl.style.height = `${diagram.height}px`;
+
+    const header = diagramEl.querySelector('.diagram-header span span');
+    if (header) header.textContent = diagram.title || 'Unnamed Diagram';
+  }
+
+  // Показать модальное окно редактирования
+  function showEditModal(diagramId) {
+    const diagramEl = document.querySelector(`.diagram[data-id="${diagramId}"]`);
+    if (!diagramEl) return;
+
+    document.getElementById('editDiagramId').value = diagramId;
+    document.getElementById('editTitle').value = diagramEl.querySelector('.diagram-header span span').textContent;
+    document.getElementById('editPosX').value = parseInt(diagramEl.style.left);
+    document.getElementById('editPosY').value = parseInt(diagramEl.style.top);
+    document.getElementById('editWidth').value = parseInt(diagramEl.style.width);
+    document.getElementById('editHeight').value = parseInt(diagramEl.style.height);
+
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+  }
+
+  // Получить данные для обновления из формы
+  function getDiagramUpdateData() {
+    return {
+      title: document.getElementById('editTitle').value,
+      positionX: parseInt(document.getElementById('editPosX').value),
+      positionY: parseInt(document.getElementById('editPosY').value),
+      width: parseInt(document.getElementById('editWidth').value),
+      height: parseInt(document.getElementById('editHeight').value)
+    };
+  }
+
+  // Получить класс иконки для типа диаграммы
+  function getDiagramIconClass(type) {
+    switch (type) {
+      case 'GANTT': return 'fa-tasks';
+      case 'DFD': return 'fa-project-diagram';
+      case 'WBS': return 'fa-sitemap';
+      case 'SAM': return 'fa-users';
+      case 'TIMELINE': return 'fa-timeline';
+      case 'CFD': return 'fa-chart-line';
+      case 'AGENDA': return 'fa-list';
+      case 'ISHIKAWA': return 'fa-fish';
+      case 'RT': return 'fa-search';
+      case 'STRATEGYMAP': return 'fa-map';
+      case 'AGILE': return 'fa-columns';
+      default: return 'fa-diagram-nested';
+    }
+  }
+
+  // Получить название типа диаграммы
+  function getDiagramTypeName(type) {
+    switch (type) {
+      case 'GANTT': return 'Диаграмма Ганта';
+      case 'DFD': return 'Диаграмма потока данных';
+      case 'WBS': return 'Структура распределения работ';
+      case 'SAM': return 'Матрица анализа заинтересованных сторон';
+      case 'TIMELINE': return 'Временная шкала проекта';
+      case 'CFD': return 'Накопительная диаграмма потоков';
+      case 'AGENDA': return 'Повестка дня';
+      case 'ISHIKAWA': return 'Диаграмма Исикавы';
+      case 'RT': return 'Исследование';
+      case 'STRATEGYMAP': return 'Стратегическая карта';
+      case 'AGILE': return 'Agile-доска';
+      default: return 'Диаграмма';
+    }
+  }
+
+  // Настройка перетаскивания
+  function makeDraggable(element) {
+    interact(element)
+            .draggable({
+              inertia: true,
+              modifiers: [
+                interact.modifiers.restrictRect({
+                  restriction: 'parent',
+                  endOnly: true
+                })
+              ],
+              autoScroll: true,
+              listeners: {
+                move: dragMoveListener,
+                end: function (event) {
+                  const diagramId = event.target.dataset.id;
+                  const x = parseInt(event.target.style.left);
+                  const y = parseInt(event.target.style.top);
+
+                  updateDiagram(diagramId, {
+                    positionX: x,
+                    positionY: y,
+                    width: parseInt(event.target.style.width),
+                    height: parseInt(event.target.style.height)
+                  }).catch(error => {
+                    console.error("Error updating diagram position:", error);
+                  });
+                }
+              }
+            })
+            .resizable({
+              edges: {left: true, right: true, bottom: true, top: true},
+              listeners: {
+                move: function (event) {
+                  const target = event.target;
+                  target.style.width = event.rect.width + 'px';
+                  target.style.height = event.rect.height + 'px';
+                },
+                end: function (event) {
+                  const diagramId = event.target.dataset.id;
+                  updateDiagram(diagramId, {
+                    width: parseInt(event.target.style.width),
+                    height: parseInt(event.target.style.height)
+                  }).catch(error => {
+                    console.error("Error updating diagram size:", error);
+                  });
+                }
+              }
+            });
+
+
+    function dragMoveListener(event) {
+      const target = event.target;
+      const x = (parseFloat(target.style.left) || 0) + event.dx;
+      const y = (parseFloat(target.style.top) || 0) + event.dy;
+
+      target.style.left = x + 'px';
+      target.style.top = y + 'px';
+    }
+  }
+
+  // Сделать функции глобальными для использования в атрибутах onclick
+  window.showEditModal = showEditModal;
+  window.deleteDiagram = deleteDiagram;
+</script>
+</body>
+</html>

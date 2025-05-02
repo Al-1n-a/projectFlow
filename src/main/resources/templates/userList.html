@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List | ProjectFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: #4361ee;
+            font-weight: 600;
+        }
+
+        .btn-add {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-add:hover {
+            background-color: #3a56d4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .user-table th, .user-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .user-table th {
+            background-color: #4361ee;
+            color: white;
+            font-weight: 500;
+        }
+
+        .user-table tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<!-- <div th:insert="~{fragments/menu :: #nav-menu}"></div> -->
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-users me-2"></i>User List
+        </h1>
+        <a th:href="@{/users/new}" class="btn-add">
+            <i class="fas fa-plus-circle me-2"></i>Add New User
+        </a>
+    </div>
+
+    <table class="user-table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.username}">Testname</td>
+            <td th:text="${user.email}">Testmail</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Вставка футера -->
+<div th:insert="~{fragments/backToMenu :: back-to-menu-footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

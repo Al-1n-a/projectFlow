@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .footer {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .back-to-menu {
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .back-to-menu:hover {
+        background-color: #e9ecef;
+        text-decoration: none;
+    }
+</style>
+
+<!-- Фрагмент футера -->
+<div th:fragment="back-to-menu-footer" class="footer">
+    <div class="container">
+        <a th:href="@{/}" class="text-decoration-none back-to-menu">
+            <i class="fas fa-arrow-left me-2"></i> Back to Menu
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
