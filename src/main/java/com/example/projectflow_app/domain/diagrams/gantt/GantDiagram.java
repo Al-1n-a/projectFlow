@@ -27,5 +27,10 @@ public class GantDiagram extends Diagram {
         }
         """;
     }
+
+    @Override
+    public String getDiagramTypeName() {
+        return "GANTT";
+    }
 }
 

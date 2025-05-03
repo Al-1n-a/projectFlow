@@ -14,4 +14,9 @@ public class WBSDiagram extends Diagram {
         }
         """;
     }
+
+    @Override
+    public String getDiagramTypeName() {
+        return "WBS";
+    }
 }

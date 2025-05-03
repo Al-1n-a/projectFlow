@@ -16,8 +16,11 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     // Проверяет, что диаграмма принадлежит доске
     boolean existsByIdAndDiagramsId(Long boardId, Long diagramId);
 
-    @EntityGraph(attributePaths = {"diagrams"})
-    @Query("SELECT b FROM Board b WHERE b.id = :boardId")
-    Optional<Board> findByIdWithDiagrams(@Param("boardId") Long boardId);
+//    @EntityGraph(attributePaths = {"diagrams"})
+//    @Query("SELECT b FROM Board b WHERE b.id = :boardId")
+//    Optional<Board> findByIdWithDiagrams(@Param("boardId") Long boardId);
+
+    @Query("SELECT DISTINCT b FROM Board b LEFT JOIN FETCH b.diagrams WHERE b.id = :id")
+    Optional<Board> findByIdWithDiagrams(@Param("id") Long id);
 
 }

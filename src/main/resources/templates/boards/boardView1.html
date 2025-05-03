@@ -15,14 +15,6 @@
 </head>
 <body>
 
-<div id="loadingOverlay">
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-</div>
-
 <div class="board-header">
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -56,9 +48,9 @@
          th:style="'left:' + ${diagram.positionX} + 'px; top:' + ${diagram.positionY} + 'px; width:' + ${diagram.width} + 'px; height:' + ${diagram.height} + 'px;'">
       <div class="diagram-header">
         <span>
-          <i class="fas" th:classappend="${diagram.type == 'GANTT'} ? 'fa-tasks' :
-                                        ${diagram.type == 'DFD'} ? 'fa-project-diagram' :
-                                        'fa-diagram-nested'"></i>
+          <i class="fas"
+             th:classappend="${diagram.diagramTypeName == 'GANTT'} ? 'fa-tasks' :
+                  (${diagram.diagramTypeName == 'DFD'} ? 'fa-project-diagram' : 'fa-diagram-nested')"></i>
           <span th:text="${diagram?.title ?: 'Unnamed Diagram'}"></span>
         </span>
         <div class="diagram-actions">
@@ -71,11 +63,16 @@
         </div>
       </div>
       <div class="diagram-content">
-        <div th:if="${diagram?.type == 'GANTT'}" class="text-muted">
-          <i class="fas fa-tasks"></i> Gantt Chart
-        </div>
-        <div th:if="${diagram?.type == 'DFD'}" class="text-muted">
-          <i class="fas fa-project-diagram"></i> Data Flow Diagram
+        <div th:switch="${diagram.diagramTypeName}" class="text-muted">
+    <span th:case="'GANTT'">
+      <i class="fas fa-tasks"></i> Gantt Chart
+    </span>
+          <span th:case="'DFD'">
+      <i class="fas fa-project-diagram"></i> Data Flow Diagram
+    </span>
+          <span th:case="*">
+      <i class="fas fa-diagram-nested"></i> Diagram
+    </span>
         </div>
       </div>
     </div>

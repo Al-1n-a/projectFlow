@@ -100,17 +100,17 @@ public class DiagramController {
             @PathVariable Long boardId,
             @PathVariable Long diagramId,
             Principal principal) {
-        User user = userService.findByUsername(principal.getName());
-
-        if (!boardService.isBoardOwnedByUser(boardId, user.getId())) {
-            return ResponseEntity.status(403).build(); //не авторизован
+        try {
+            System.out.println("Attempting to delete diagram " + diagramId + " from board " + boardId);
+            diagramService.deleteDiagram(diagramId, boardId, principal.getName());
+            System.out.println("Diagram deleted successfully");
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            System.err.println("Security exception: " + e.getMessage());
+            return ResponseEntity.status(403).build();
+        } catch (RuntimeException e) {
+            System.err.println("Runtime exception: " + e.getMessage());
+            return ResponseEntity.notFound().build();
         }
-
-        if (!boardService.isDiagramInBoard(boardId, diagramId)) {
-            return ResponseEntity.status(404).build(); //не найден
-        }
-
-        diagramService.deleteDiagram(diagramId);
-        return ResponseEntity.ok().build();
     }
 }

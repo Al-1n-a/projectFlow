@@ -21,4 +21,6 @@ public interface BoardService {
 
     public boolean isDiagramInBoard(Long boardId, Long diagramId);
 
+    public Board findBoardWithDiagrams(Long boardId);
+
 }

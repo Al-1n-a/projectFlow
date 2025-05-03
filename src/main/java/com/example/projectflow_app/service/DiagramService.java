@@ -16,7 +16,7 @@ public interface DiagramService {
 
     void updateDiagramPosition(Long diagramId, PositionDTO newPosition);
 
-    public void deleteDiagram(Long boardId);
+    public void deleteDiagram(Long diagramId, Long boardId, String username);
 
     public DiagramDTO updateDiagram(Long diagramId, DiagramUpdateDTO updateDTO, String username);
 

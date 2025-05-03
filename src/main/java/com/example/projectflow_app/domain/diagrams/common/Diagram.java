@@ -2,6 +2,7 @@ package com.example.projectflow_app.domain.diagrams.common;
 
 import com.example.projectflow_app.domain.Board;
 import com.example.projectflow_app.domain.Type;
+import com.example.projectflow_app.domain.diagrams.common.Position;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,10 +48,11 @@ public abstract class Diagram {
         String className = this.getClass().getSimpleName();
         return Type.valueOf(className.replace("Diagram", "").toUpperCase());
     }
+    public abstract String getDiagramTypeName();
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String config;
+    private String config = "{}";;
 
     @ManyToOne
     @JoinColumn(name = "board_id")

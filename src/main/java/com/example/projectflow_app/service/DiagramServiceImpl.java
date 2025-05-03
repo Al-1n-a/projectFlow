@@ -100,6 +100,7 @@ public class DiagramServiceImpl implements DiagramService {
         }
 
         Diagram diagram = diagramFactory.createDiagram(type, board.getId());
+        diagram.setBoard(board);
         return diagramMapper.toDTO(diagramRepository.save(diagram));
     }
 
@@ -212,10 +213,26 @@ public class DiagramServiceImpl implements DiagramService {
     }
 
     @Override
-    public void deleteDiagram(Long diagramId) {
+    @Transactional
+    public void deleteDiagram(Long diagramId, Long boardId, String username) {
+        // Загружаем диаграмму вместе с доской и пользователем
         Diagram diagram = diagramRepository.findById(diagramId)
                 .orElseThrow(() -> new RuntimeException("Diagram not found"));
 
+        // Проверяем принадлежность к доске
+        if (!diagram.getBoard().getId().equals(boardId)) {
+            throw new RuntimeException("Diagram does not belong to board");
+        }
+
+        // Проверяем владельца
+        User user = userService.findByUsername(username);
+        if (!diagram.getBoard().getUser().getId().equals(user.getId())) {
+            throw new SecurityException("User doesn't own this diagram");
+        }
+
+        // Явное удаление с очисткой связей
+        diagram.getBoard().getDiagrams().remove(diagram);
         diagramRepository.delete(diagram);
+        diagramRepository.flush();
     }
 }

@@ -90,7 +90,7 @@ async function addDiagram(diagramType) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ type: diagramType })
+            body: JSON.stringify({ type: diagramType, boardId: boardId })
         });
 
         if (!response.ok) {
@@ -128,7 +128,7 @@ async function updateDiagram(diagramId, updateData) {
 
 // Удаление диаграммы
 async function deleteDiagram(diagramId) {
-    if (!confirm('Are you sure you want to delete this diagram?')) return;
+    if (!confirm('Вы уверены, что хотите удалить диаграмму?')) return;
 
     const boardId = document.querySelector('meta[name="boardId"]').content;
     const csrfToken = document.querySelector('meta[name="_csrf"]').content;
@@ -136,19 +136,30 @@ async function deleteDiagram(diagramId) {
 
     try {
         showLoading();
+        console.log("Sending delete request for diagram", diagramId);
+
         const response = await fetch(`/boards/${boardId}/diagrams/${diagramId}`, {
             method: 'DELETE',
-            headers: { [csrfHeader]: csrfToken }
+            headers: {
+                [csrfHeader]: csrfToken,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         });
 
+        console.log("Delete response status:", response.status);
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error("Delete failed with response:", errorText);
+            throw new Error(errorText || `HTTP ${response.status}`);
         }
 
+        console.log("Removing diagram from DOM");
         document.querySelector(`.diagram[data-id="${diagramId}"]`)?.remove();
     } catch (error) {
-        showError("Failed to delete diagram: " + error.message);
-        console.error("Error deleting diagram:", error);
+        console.error("Full delete error:", error);
+        showError("Ошибка удаления: " + (error.message || "неизвестная ошибка"));
     } finally {
         hideLoading();
     }

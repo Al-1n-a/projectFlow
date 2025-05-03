@@ -2,64 +2,78 @@ package com.example.projectflow_app.domain.diagrams;
 
 import com.example.projectflow_app.dao.BoardRepository;
 import com.example.projectflow_app.dao.DiagramRepository;
+import com.example.projectflow_app.domain.Board;
 import com.example.projectflow_app.domain.Type;
 import com.example.projectflow_app.domain.diagrams.common.Diagram;
 import com.example.projectflow_app.domain.diagrams.dfd.DFDDiagram;
 import com.example.projectflow_app.domain.diagrams.gantt.GantDiagram;
 import com.example.projectflow_app.service.BoardService;
 import com.example.projectflow_app.service.UserService;
+import jakarta.persistence.DiscriminatorValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DiagramFactory {
-    private final BoardRepository boardRepository;
+    private final BoardService boardService;
 
     @Autowired
-    public DiagramFactory(BoardRepository boardRepository, DiagramRepository diagramRepository, UserService userService, BoardService boardService) {
-        this.boardRepository = boardRepository;
+    public DiagramFactory(BoardService boardService) {
+        this.boardService = boardService;
     }
 
     public Diagram createDiagram(Type type, Long boardId) {
-        Diagram diagram;
-        switch (type) {
-            case GANTT:
-                diagram = new GantDiagram();
-                break;
-            case DFD:
-                diagram = new DFDDiagram();
-                break;
-//            case WBS:
-//                diagram = new WBSDiagram();
-//                break;
-//            case SAM:
-//                diagram = new SAMDiagram();
-//                break;
-//            case TIMELINE:
-//                diagram = new TimelineDiagram();
-//                break;
-//            case CFD:
-//                diagram = new CFDDiagram();
-//                break;
-//            case AGENDA:
-//                diagram = new AGENDADiagram();
-//                break;
-//            case ISHIKAWA:
-//                diagram = new IsikawaDiagram();
-//                break;
-//            case RT:
-//                diagram = new RTDiagram();
-//                break;
-//            case STRATEGYMAP:
-//                diagram = new StrategyMapDiagram();
-//                break;
-//            case AGILE:
-//                diagram = new AGILEDiagram();
-//                break;
-            default:
-                throw new IllegalArgumentException("Unknown diagram type: " + type);
-        }
-        diagram.setTitle("New Diagram");
+        Board board = boardService.findById(boardId);
+
+        Diagram diagram = switch (type) {
+            case GANTT -> GantDiagram.builder()
+                    .board(board)
+                    .title("New Gantt Chart")
+                    .positionX(50)
+                    .positionY(50)
+                    .width(400)
+                    .height(300)
+                    .config("{}")
+                    .build();
+
+            case DFD -> DFDDiagram.builder()
+                    .board(board)
+                    .title("New DFD Diagram")
+                    .positionX(50)
+                    .positionY(50)
+                    .width(400)
+                    .height(300)
+                    .config("{}")
+                    .build();
+
+            // Раскомментируйте по мере реализации других типов
+            /*
+            case WBS -> WBSDiagram.builder()
+                    .board(board)
+                    .title("New WBS Diagram")
+                    .positionX(50)
+                    .positionY(50)
+                    .width(400)
+                    .height(300)
+                    .config("{}")
+                    .build();
+            */
+
+            default -> throw new IllegalArgumentException("Unknown diagram type: " + type);
+        };
+
+        // Убедимся, что discriminator value будет корректным
+        validateDiscriminatorValue(diagram);
         return diagram;
+    }
+
+    private void validateDiscriminatorValue(Diagram diagram) {
+        DiscriminatorValue discriminator = diagram.getClass()
+                .getAnnotation(DiscriminatorValue.class);
+
+        if (discriminator == null) {
+            throw new IllegalStateException("Diagram class " + diagram.getClass().getSimpleName() +
+                    " must have @DiscriminatorValue annotation");
+        }
     }
 }

@@ -27,8 +27,17 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    @Transactional
     public Board findById(Long id) {
-        return boardRepository.findFirstById(id);
+        return boardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Доска не найдена: " + id));
+    }
+
+    @Override
+    @Transactional
+    public Board findBoardWithDiagrams(Long boardId) {
+        return boardRepository.findByIdWithDiagrams(boardId)
+                .orElseThrow(() -> new RuntimeException("Доска не найдена: " + boardId));
     }
 
     @Override

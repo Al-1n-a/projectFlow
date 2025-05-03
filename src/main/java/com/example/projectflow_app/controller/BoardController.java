@@ -87,8 +87,8 @@ public class BoardController {
             return "redirect:/boards";
         }
 
-        Board board = boardService.findById(boardId);
-        if (board == null|| board.getId() == null) {
+        Board board = boardService.findBoardWithDiagrams(boardId);
+        if (board == null || board.getId() == null) {
             return "redirect:/boards";
         }
 
@@ -96,7 +96,6 @@ public class BoardController {
         model.addAttribute("diagramTypes", Arrays.stream(Type.values())
                 .map(type -> new DiagramTypeDTO(type.name(), type.getDisplayName()))
                 .collect(Collectors.toList()));
-
 
         return "boards/boardView1";
     }

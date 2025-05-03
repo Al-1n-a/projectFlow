@@ -21,7 +21,7 @@ CREATE TABLE boards (
                         id BIGINT NOT NULL PRIMARY KEY,
                         created TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
                         modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
-                        user_id BIGINT,
+                        user_id BIGINT NOT NULL,
                         description VARCHAR(255),
                         title VARCHAR(255)
 );
@@ -42,7 +42,7 @@ CREATE TABLE diagrams (
                           config JSONB NOT NULL DEFAULT '{}'::jsonb,
                           created_at TIMESTAMPTZ DEFAULT NOW(),
                           updated_at TIMESTAMPTZ DEFAULT NOW(),
-                          board_id BIGINT REFERENCES boards(id)
+                          board_id BIGINT NOT NULL
 );
 
 --внешние ключи
