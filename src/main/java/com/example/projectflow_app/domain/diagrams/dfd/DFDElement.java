@@ -13,11 +13,13 @@ public class DFDElement {
     private Long id;
 
     private String type;
-    private String name;
-    private Integer positionX;
-    private Integer positionY;
+    private String name; //"process", "dataStore", "externalEntity", "dataFlow"
+//    private Integer positionX;
+//    private Integer positionY;
+    private String position; // JSON с координатами
+    private String properties; // Дополнительные свойства в JSON
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diagram_id")
-    private Diagram diagram;
+    private DFDDiagram diagram;
 }

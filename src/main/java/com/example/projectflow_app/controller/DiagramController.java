@@ -3,10 +3,14 @@ package com.example.projectflow_app.controller;
 import com.example.projectflow_app.dao.DiagramRepository;
 import com.example.projectflow_app.domain.Type;
 import com.example.projectflow_app.domain.User;
+import com.example.projectflow_app.domain.diagrams.common.Diagram;
+import com.example.projectflow_app.domain.diagrams.dfd.DFDDiagram;
+import com.example.projectflow_app.domain.diagrams.gantt.GantDiagram;
 import com.example.projectflow_app.dto.DiagramDTO;
 import com.example.projectflow_app.dto.DiagramDataDTO;
 import com.example.projectflow_app.dto.DiagramUpdateDTO;
 import com.example.projectflow_app.dto.PositionDTO;
+import com.example.projectflow_app.mapper.DiagramMapper;
 import com.example.projectflow_app.service.BoardService;
 import com.example.projectflow_app.service.DiagramService;
 import com.example.projectflow_app.service.UserService;
@@ -28,12 +32,14 @@ public class DiagramController {
     private final DiagramService diagramService;
     private final UserService userService;
     private final BoardService boardService;
+    private final DiagramMapper diagramMapper;
 
     @Autowired
-    public DiagramController(DiagramService diagramService, UserService userService, BoardService boardService) {
+    public DiagramController(DiagramService diagramService, UserService userService, BoardService boardService, DiagramRepository diagramRepository, DiagramMapper diagramMapper) {
         this.diagramService = diagramService;
         this.userService = userService;
         this.boardService = boardService;
+        this.diagramMapper = diagramMapper;
     }
 
 //    @GetMapping
@@ -84,15 +90,42 @@ public class DiagramController {
 
     @PutMapping("/{diagramId}")
     public ResponseEntity<DiagramDTO> updateDiagram(
+            @PathVariable Long boardId,
             @PathVariable Long diagramId,
             @RequestBody DiagramUpdateDTO updateDTO,
             Principal principal) {
 
-        if (updateDTO == null) {
-            return ResponseEntity.badRequest().build();
+        // Проверка прав доступа
+        User user = userService.findByUsername(principal.getName());
+        if (!boardService.isBoardOwnedByUser(boardId, user.getId())) {
+            return ResponseEntity.status(403).build();
         }
-        DiagramDTO updated = diagramService.updateDiagram(diagramId, updateDTO, principal.getName());
-        return ResponseEntity.ok(updated);
+
+        Diagram diagram = diagramService.findById(diagramId);
+
+        // Обновление специфичных полей
+        if (diagram instanceof GantDiagram) {
+            GantDiagram gantDiagram = (GantDiagram) diagram;
+            if (updateDTO.getStartDate() != null) {
+                gantDiagram.setProjectStartDate(updateDTO.getStartDate());
+            }
+            if (updateDTO.getEndDate() != null) {
+                gantDiagram.setProjectEndDate(updateDTO.getEndDate());
+            }
+        } else if (diagram instanceof DFDDiagram) {
+            DFDDiagram dfdDiagram = (DFDDiagram) diagram;
+            if (updateDTO.getLevel() != null) {
+                dfdDiagram.setLevel(updateDTO.getLevel());
+            }
+        }
+
+        // Обновление общих полей
+        if (updateDTO.getTitle() != null) {
+            diagram.setTitle(updateDTO.getTitle());
+        }
+
+        Diagram updated = diagramService.save(diagram);
+        return ResponseEntity.ok(diagramMapper.toDTO(updated));
     }
 
     @DeleteMapping("/{diagramId}")
@@ -112,5 +145,25 @@ public class DiagramController {
             System.err.println("Runtime exception: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{diagramId}")
+    public ResponseEntity<DiagramDTO> getDiagram(
+            @PathVariable Long boardId,
+            @PathVariable Long diagramId,
+            Principal principal) {
+
+        Diagram diagram = diagramService.findById(diagramId);
+        if (!diagram.getBoard().getId().equals(boardId)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        // Проверка прав доступа
+        User user = userService.findByUsername(principal.getName());
+        if (!boardService.isBoardOwnedByUser(boardId, user.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(diagramMapper.toDTO(diagram));
     }
 }

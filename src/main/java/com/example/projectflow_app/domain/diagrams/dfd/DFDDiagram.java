@@ -1,20 +1,24 @@
 package com.example.projectflow_app.domain.diagrams.dfd;
 
 import com.example.projectflow_app.domain.diagrams.common.Diagram;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @SuperBuilder(toBuilder = true)
+@Table(name = "dfd_diagrams")
 @DiscriminatorValue("DFD")
 public class DFDDiagram extends Diagram {
-    @OneToMany(mappedBy = "diagram", cascade = CascadeType.ALL)
-    private List<DFDElement> elements;
+
+    private Integer level;
+
+    @OneToMany(mappedBy = "diagram", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DFDElement> elements = new ArrayList<>();
 
     public DFDDiagram() {}
 

@@ -7,6 +7,7 @@ import com.example.projectflow_app.domain.Type;
 import com.example.projectflow_app.domain.diagrams.common.Diagram;
 import com.example.projectflow_app.domain.diagrams.dfd.DFDDiagram;
 import com.example.projectflow_app.domain.diagrams.gantt.GantDiagram;
+import com.example.projectflow_app.domain.diagrams.wbs.WBSDiagram;
 import com.example.projectflow_app.service.BoardService;
 import com.example.projectflow_app.service.UserService;
 import jakarta.persistence.DiscriminatorValue;
@@ -33,7 +34,7 @@ public class DiagramFactory {
                     .positionY(50)
                     .width(400)
                     .height(300)
-                    .config("{}")
+                    .config("{\"tasks\":[]}")
                     .build();
 
             case DFD -> DFDDiagram.builder()
@@ -43,11 +44,9 @@ public class DiagramFactory {
                     .positionY(50)
                     .width(400)
                     .height(300)
-                    .config("{}")
+                    .level(0)
+                    .config("{\"elements\":[],\"level\":0}")
                     .build();
-
-            // Раскомментируйте по мере реализации других типов
-            /*
             case WBS -> WBSDiagram.builder()
                     .board(board)
                     .title("New WBS Diagram")
@@ -57,8 +56,6 @@ public class DiagramFactory {
                     .height(300)
                     .config("{}")
                     .build();
-            */
-
             default -> throw new IllegalArgumentException("Unknown diagram type: " + type);
         };
 

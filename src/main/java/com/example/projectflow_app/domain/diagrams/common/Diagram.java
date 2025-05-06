@@ -24,7 +24,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+
+@Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "diagram_type", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "diagrams")
 @Access(AccessType.FIELD)

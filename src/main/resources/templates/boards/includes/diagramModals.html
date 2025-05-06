@@ -53,4 +53,99 @@
         </div>
     </div>
 </div>
+
+<!-- Gantt Diagram Edit Modal -->
+<div th:fragment="ganttEditModal">
+    <div class="modal fade" id="ganttEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Gantt Chart</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="ganttEditForm">
+                        <input type="hidden" id="ganttDiagramId">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="ganttTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="ganttStartDate">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="ganttEndDate">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveGanttDiagram()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DFD Diagram Edit Modal -->
+<div th:fragment="dfdEditModal">
+    <div class="modal fade" id="dfdEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit DFD Diagram</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="dfdEditForm">
+                        <input type="hidden" id="dfdDiagramId">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="dfdTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Level</label>
+                            <select class="form-select" id="dfdLevel">
+                                <option value="0">Level 0</option>
+                                <option value="1">Level 1</option>
+                                <option value="2">Level 2</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDfdDiagram()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- wbsEditModal.html -->
+<div class="modal fade" id="wbsEditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit WBS Diagram</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="wbsDiagramId">
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-control" id="wbsTitle">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Project Code</label>
+                    <input type="text" class="form-control" id="wbsProjectCode">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveWbsDiagram()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 </html>

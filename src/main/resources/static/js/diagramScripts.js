@@ -218,18 +218,79 @@ function updateDiagramElement(diagram) {
 }
 
 // Показать модальное окно редактирования
-function showEditModal(diagramId) {
-    const diagramEl = document.querySelector(`.diagram[data-id="${diagramId}"]`);
-    if (!diagramEl) return;
+function showEditModal(diagramId, diagramType) {
+    const boardId = document.querySelector('meta[name="boardId"]').content;
 
-    document.getElementById('editDiagramId').value = diagramId;
-    document.getElementById('editTitle').value = diagramEl.querySelector('.diagram-header span span').textContent;
-    document.getElementById('editPosX').value = parseInt(diagramEl.style.left);
-    document.getElementById('editPosY').value = parseInt(diagramEl.style.top);
-    document.getElementById('editWidth').value = parseInt(diagramEl.style.width);
-    document.getElementById('editHeight').value = parseInt(diagramEl.style.height);
+    fetch(`/boards/${boardId}/diagrams/${diagramId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load diagram');
+            return response.json();
+        })
+        .then(diagram => {
+            // Общие поля для всех диаграмм
+            document.getElementById('editDiagramId').value = diagram.id;
+            document.getElementById('editTitle').value = diagram.title;
 
-    new bootstrap.Modal(document.getElementById('editModal')).show();
+            // Специфичные поля для каждого типа
+            const modalId = `${diagramType.toLowerCase()}EditModal`;
+            const modalElement = document.getElementById(modalId);
+
+            if (modalElement) {
+                if (diagramType === 'GANTT') {
+                    const config = JSON.parse(diagram.config || '{}');
+                    document.getElementById('ganttStartDate').value = config.startDate || '';
+                    document.getElementById('ganttEndDate').value = config.endDate || '';
+                }
+                else if (diagramType === 'DFD') {
+                    document.getElementById('dfdLevel').value = diagram.level || 0;
+                }
+                else if (diagramType === 'WBS') {
+                    document.getElementById('wbsProjectCode').value = diagram.projectCode || '';}
+                // Добавьте обработку других типов
+
+                new bootstrap.Modal(modalElement).show();
+            } else {
+                showError(`Edit modal not found for type: ${diagramType}`);
+            }
+        })
+        .catch(error => {
+            showError("Failed to load diagram: " + error.message);
+            console.error(error);
+        });
+}
+
+async function saveGanttDiagram() {
+    const diagramId = document.getElementById('ganttDiagramId').value;
+    const updateData = {
+        title: document.getElementById('ganttTitle').value,
+        startDate: document.getElementById('ganttStartDate').value,
+        endDate: document.getElementById('ganttEndDate').value
+    };
+
+    await updateDiagram(diagramId, updateData);
+    bootstrap.Modal.getInstance(document.getElementById('ganttEditModal')).hide();
+}
+
+async function saveDfdDiagram() {
+    const diagramId = document.getElementById('dfdDiagramId').value;
+    const updateData = {
+        title: document.getElementById('dfdTitle').value,
+        level: document.getElementById('dfdLevel').value
+    };
+
+    await updateDiagram(diagramId, updateData);
+    bootstrap.Modal.getInstance(document.getElementById('dfdEditModal')).hide();
+}
+
+async function saveWbsDiagram() {
+    const diagramId = document.getElementById('wbsDiagramId').value;
+    const updateData = {
+        title: document.getElementById('wbsTitle').value,
+        level: document.getElementById('wbsProjectCode').value
+    };
+
+    await updateDiagram(diagramId, updateData);
+    bootstrap.Modal.getInstance(document.getElementById('wbsEditModal')).hide();
 }
 
 // Получить данные для обновления из формы

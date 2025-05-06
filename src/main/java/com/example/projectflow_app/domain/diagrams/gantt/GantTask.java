@@ -17,9 +17,9 @@ public class GantTask {
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Double progress;
+    private Integer progress;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diagram_id")
-    private Diagram diagram;
+    private GantDiagram diagram;
 }

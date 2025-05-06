@@ -9,6 +9,7 @@ import com.example.projectflow_app.domain.User;
 import com.example.projectflow_app.domain.diagrams.common.Position;
 import com.example.projectflow_app.domain.diagrams.dfd.DFDDiagram;
 import com.example.projectflow_app.domain.diagrams.gantt.GantDiagram;
+import com.example.projectflow_app.domain.diagrams.wbs.WBSDiagram;
 import com.example.projectflow_app.dto.*;
 import com.example.projectflow_app.mapper.DiagramMapper;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -133,37 +134,35 @@ public class DiagramServiceImpl implements DiagramService {
     }
 
     @Override
-    @Transactional
     public DiagramDTO updateDiagram(Long diagramId, DiagramUpdateDTO updateDTO, String username) {
         Diagram diagram = diagramRepository.findById(diagramId)
                 .orElseThrow(() -> new RuntimeException("Diagram not found with id: " + diagramId));
         User user = userService.findByUsername(username);
+
         if (!diagram.getBoard().getUser().equals(user)) {
             throw new SecurityException("User does not own the diagram");
         }
 
+        // Общие поля
         if (updateDTO.getTitle() != null) {
             diagram.setTitle(updateDTO.getTitle());
         }
 
-        if (updateDTO.getPositionX() != null) {
-            diagram.setPositionX(updateDTO.getPositionX());
-        }
-
-        if (updateDTO.getPositionY() != null) {
-            diagram.setPositionY(updateDTO.getPositionY());
-        }
-
-        if (updateDTO.getWidth() != null) {
-            diagram.setWidth(updateDTO.getWidth());
-        }
-
-        if (updateDTO.getHeight() != null) {
-            diagram.setHeight(updateDTO.getHeight());
-        }
-
+        // Специфичные поля для каждого типа
         if (updateDTO.getConfig() != null) {
             updateDiagramSpecificData(diagram, updateDTO.getConfig());
+        } else {
+            // Обработка отдельных полей (если не используется config)
+            if (diagram instanceof GantDiagram && updateDTO.getStartDate() != null) {
+                ((GantDiagram) diagram).setProjectStartDate(updateDTO.getStartDate());
+            }
+            if (diagram instanceof DFDDiagram && updateDTO.getLevel() != null) {
+                ((DFDDiagram) diagram).setLevel(updateDTO.getLevel());
+            }
+            if (diagram instanceof WBSDiagram && updateDTO.getProjectCode() != null) {
+                ((WBSDiagram) diagram).setProjectCode(updateDTO.getProjectCode());
+            }
+            // Добавьте обработку для других типов
         }
 
         return diagramMapper.toDTO(diagramRepository.save(diagram));
@@ -179,6 +178,10 @@ public class DiagramServiceImpl implements DiagramService {
                 case DFD:
                     ((DFDDiagram) diagram).setConfig(configJson);
                     break;
+                case WBS:
+                    ((WBSDiagram) diagram).setConfig(configJson);
+                    break;
+
                 // ... другие типы
             }
         } catch (IOException e) {
@@ -234,5 +237,16 @@ public class DiagramServiceImpl implements DiagramService {
         diagram.getBoard().getDiagrams().remove(diagram);
         diagramRepository.delete(diagram);
         diagramRepository.flush();
+    }
+
+    @Override
+    public Diagram findById(Long id) {
+        return diagramRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Diagram not found"));
+    }
+
+    @Override
+    public Diagram save(Diagram diagram) {
+        return diagramRepository.save(diagram);
     }
 }
